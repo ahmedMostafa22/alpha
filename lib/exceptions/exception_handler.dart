@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import '../Constants/assets_paths.dart';
 
 class ExceptionHandler {
-  static Widget getExceptionWidget(Object exception) {
+  static Widget getExceptionWidget(Object exception, void Function() onRetry) {
     String image =
         exception is SocketException ? AssetPaths.noInternet : AssetPaths.error;
-    return ExceptionWidget(exception, image);
+    return ExceptionWidget(exception, image, onRetry: onRetry);
   }
 }

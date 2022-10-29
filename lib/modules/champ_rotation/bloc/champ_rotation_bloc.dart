@@ -19,7 +19,8 @@ class ChampRotationBloc extends Bloc<ChampRotationEvent, ChampRotationState> {
           emit(ChampRotationLoaded(champs));
         }
       } catch (e) {
-        emit(ChampRotationError(ExceptionHandler.getExceptionWidget(e)));
+        emit(ChampRotationError(
+            ExceptionHandler.getExceptionWidget(e, () => add(event))));
         print(e.toString());
       }
     });
