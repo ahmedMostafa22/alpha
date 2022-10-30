@@ -8,7 +8,20 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  #ui:
   cupertino_icons: ^1.0.2
+  intro_screen_onboarding_flutter: ^1.0.0
+  loading_indicator: ^3.0.3
+
+  #animations:
+  animate_do: ^2.1.0
+
+  #utils:
+  get: ^4.6.5
+  lottie: ^1.4.3
+
+  #localization:
+  easy_localization: ^3.0.1
 
   #State Management
   flutter_bloc: ^7.2.0
@@ -16,12 +29,37 @@ dependencies:
   #Networking
   http: ^0.13.4
 
+  #dartz:
+  dartz: ^0.10.1
+
+  #local_storage:
+  shared_preferences: ^2.0.15
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+
+  #native_splash_screen:
+  flutter_native_splash: ^2.2.13
+#  flutter pub run flutter_native_splash:create
+
+  #launcher_icons:
+  flutter_launcher_icons: ^0.10.0
+#  flutter pub run flutter_launcher_icons:main
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  background_image: "assets/background.png"
+
 flutter:
   uses-material-design: true
 
   assets:
     - assets/images/
+    - assets/lotties/
+    - assets/translations/

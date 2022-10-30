@@ -12,7 +12,8 @@ class Api {
 
   Future<dynamic> request(String requestUrl, RequestMethod requestMethod,
       Map<String, String> headers,
-      {Map<String, dynamic> body = const {}}) async {
+      {Map<String, dynamic> body = const {},
+      List<MultipartFile> files = const []}) async {
     try {
       final DateTime startTime = DateTime.now();
       final Uri uri = Uri.parse(requestUrl);
@@ -36,15 +37,13 @@ class Api {
         case RequestMethod.postMultiPart:
           StreamedResponse streamedResponse = (await _postMultipart(
               uri, headers,
-              body: Map<String, String>.from(body)));
-          response = Response(await streamedResponse.stream.bytesToString(),
-              streamedResponse.statusCode);
+              body: Map<String, String>.from(body), files: files));
+          response = await Response.fromStream(streamedResponse);
           break;
         case RequestMethod.putMultiPart:
-          StreamedResponse streamedResponse =
-              (await _putMultipart(uri, headers, body: body));
-          response = Response(await streamedResponse.stream.bytesToString(),
-              streamedResponse.statusCode);
+          StreamedResponse streamedResponse = (await _putMultipart(uri, headers,
+              body: Map<String, String>.from(body), files: files));
+          response = await Response.fromStream(streamedResponse);
           break;
       }
       final DateTime endTime = DateTime.now();
@@ -59,6 +58,7 @@ class Api {
       print(headers.toString());
       print('=============================');
       if (response.statusCode == 401) {
+        //TODO view login screen
         throw AppExceptions.authorizationException;
       } else if (response.statusCode >= 500) {
         throw AppExceptions.internalServerError;
@@ -104,24 +104,20 @@ class Api {
       delete(uri, headers: header, body: json.encode(body)).timeout(_timeOut);
 
   Future<StreamedResponse> _postMultipart(Uri uri, Map<String, String> header,
-      {Map<String, String> body = const {}}) async {
+      {Map<String, String> body = const {},
+      List<MultipartFile> files = const []}) async {
     MultipartRequest request = MultipartRequest('POST', uri);
-    request.files.add(
-        await MultipartFile.fromPath('ProfileImage', body['ProfileImage']!));
+    request.files.addAll(files);
     request.fields.addAll(body);
     return request.send().timeout(_timeOut);
   }
 
   Future<StreamedResponse> _putMultipart(Uri uri, Map<String, String> headers,
-      {Map<String, dynamic> body = const {}}) async {
+      {Map<String, String> body = const {},
+      List<MultipartFile> files = const []}) async {
     MultipartRequest request = MultipartRequest('PUT', uri);
-    if (body.values.first is List<String>) {
-      for (var s in (body.values.first as List<String>)) {
-        request.files.add(MultipartFile.fromString(body.keys.first, s));
-      }
-    } else {
-      request.fields.addAll(Map<String, String>.from(body));
-    }
+    request.files.addAll(files);
+    request.fields.addAll(body);
     request.headers.addAll(headers);
     return request.send().timeout(_timeOut);
   }
