@@ -2,16 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:alpha/modules/login/views/screens/login_screen.dart';
+import 'package:dartz/dartz.dart';
+import 'package:get/get.dart' as g;
 import 'package:http/http.dart';
 
-import '../Enums/request_methods.dart';
 import '../Exceptions/exceptions.dart';
+import '../enums/request_methods.dart';
 
 class Api {
   final Duration _timeOut = const Duration(minutes: 1);
 
-  Future<dynamic> request(String requestUrl, RequestMethod requestMethod,
-      Map<String, String> headers,
+  Future<Either<Exception, Response>> request(String requestUrl,
+      RequestMethod requestMethod, Map<String, String> headers,
       {Map<String, dynamic> body = const {},
       List<MultipartFile> files = const []}) async {
     try {
@@ -58,29 +61,29 @@ class Api {
       print(headers.toString());
       print('=============================');
       if (response.statusCode == 401) {
-        //TODO view login screen
-        throw AppExceptions.authorizationException;
+        g.Get.offAll(() => const LoginScreen());
+        return left(AppExceptions.authorizationException);
       } else if (response.statusCode >= 500) {
-        throw AppExceptions.internalServerError;
+        return left(AppExceptions.internalServerError);
       } else if (response.statusCode < 500 && response.statusCode > 399) {
         String errorMessage = json.decode(response.body)['message'] ?? 'NA';
-        throw errorMessage == 'NA'
+        return left(errorMessage == 'NA'
             ? AppExceptions.defaultException
-            : Exception(errorMessage);
+            : Exception(errorMessage));
       } else if (response.statusCode > 199 && response.statusCode < 300) {
-        return response;
+        return right(response);
       } else {
-        throw AppExceptions.defaultException;
+        return left(AppExceptions.defaultException);
       }
     } on SocketException catch (_) {
-      throw AppExceptions.networkError;
+      return left(AppExceptions.networkError);
     } on TimeoutException catch (_) {
-      throw AppExceptions.timeOutException;
-    } on Exception catch (_) {
-      rethrow;
+      return left(AppExceptions.timeOutException);
+    } on Exception catch (e) {
+      return left(e);
     } catch (e) {
       print(e.toString());
-      rethrow;
+      return left(e as Exception);
     }
   }
 
